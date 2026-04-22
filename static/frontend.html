@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Application</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            height: 100vh;
+            display: flex;
+            background: white;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        /* ===== AUTH SECTION ===== */
+        .auth-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .auth-box {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .auth-box h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .auth-box p {
+            text-align: center;
+            color: #999;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 13px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* ===== CHAT SECTION ===== */
+        .chat-container {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: row;
+        }
+
+        .chat-container.active {
+            display: flex;
+        }
+
+        /* Sidebar - Rooms List */
+        .sidebar {
+            width: 300px;
+            background: #f8f9fa;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #ddd;
+            background: white;
+        }
+
+        .sidebar-header h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .create-room-btn {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .create-room-btn:hover {
+            opacity: 0.9;
+        }
+
+        .user-info {
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .rooms-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .room-item {
+            padding: 12px;
+            margin-bottom: 8px;
+            background: white;
+            border-left: 3px solid transparent;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .room-item:hover {
+            background: #f0f0f0;
+        }
+
+        .room-item.active {
+            background: #e8eaf6;
+            border-left-color: #667eea;
+        }
+
+        .room-item h3 {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .room-item p {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .logout-btn {
+            padding: 10px;
+            margin: 10px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+
+        /* Main Chat Area */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .chat-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .chat-header h1 {
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+
+        .chat-header p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            animation: slideIn 0.3s ease-in;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.own {
+            align-items: flex-end;
+        }
+
+        .message-bubble {
+            max-width: 60%;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            word-wrap: break-word;
+        }
+
+        .message.own .message-bubble {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px 10px 0 10px;
+        }
+
+        .message.other .message-bubble {
+            background: white;
+            color: #333;
+            border-radius: 10px 10px 10px 0;
+            border: 1px solid #ddd;
+        }
+
+        .message-meta {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        .message.own .message-meta {
+            text-align: right;
+        }
+
+        .message.other .message-meta {
+            text-align: left;
+        }
+
+        .no-room-selected {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            text-align: center;
+            color: #999;
+        }
+
+        /* Input Area */
+        .input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #ddd;
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .input-area input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        .input-area button {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .input-area button:hover {
+            opacity: 0.9;
+        }
+
+        .input-area button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .modal-buttons .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .modal-buttons .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .success-message {
+            color: #27ae60;
+            font-size: 13px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                max-height: 300px;
+            }
+
+            .chat-area {
+                flex: 1;
+            }
+
+            .message-bubble {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Auth Container -->
+    <div id="authContainer" class="auth-container">
+        <div class="auth-box">
+            <h1 id="authTitle">Login</h1>
+            <p id="authSubtitle">Welcome back to Chat App</p>
+            
+            <form id="authForm">
+                <div id="usernameField" class="form-group" style="display: none;">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" placeholder="Enter username" />
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="Enter email" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter password" required />
+                </div>
+
+                <div id="roleField" class="form-group" style="display: none;">
+                    <label for="role">Role</label>
+                    <select id="role" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px;">
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+
+                <div id="errorMessage" class="error-message"></div>
+                <div id="successMessage" class="success-message"></div>
+
+                <div class="auth-buttons">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">Login</button>
+                    <button type="button" class="btn btn-secondary" id="toggleBtn">Sign Up</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Chat Container -->
+    <div id="chatContainer" class="chat-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>Rooms</h2>
+                <button class="create-room-btn" id="createRoomBtn">+ Create Room</button>
+                <div class="user-info" id="userInfo">User: Loading...</div>
+            </div>
+            <div class="rooms-list" id="roomsList"></div>
+            <button class="logout-btn" id="logoutBtn">Logout</button>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="chat-area">
+            <div class="chat-header" id="chatHeader">
+                <h1 id="selectedRoomName">Select a room to start chatting</h1>
+                <p id="selectedRoomDesc"></p>
+            </div>
+            <div class="messages-container" id="messagesContainer">
+                <div class="no-room-selected">
+                    <div>
+                        <h2>No Room Selected</h2>
+                        <p>Choose a room from the left to start chatting</p>
+                    </div>
+                </div>
+            </div>
+            <div class="input-area" id="inputArea" style="display: none;">
+                <input type="text" id="messageInput" placeholder="Type your message..." />
+                <button id="sendBtn" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Room Modal -->
+    <div id="createRoomModal" class="modal">
+        <div class="modal-content">
+            <h2>Create New Room</h2>
+            <div class="form-group">
+                <label for="roomName">Room Name</label>
+                <input type="text" id="roomName" placeholder="Enter room name" />
+            </div>
+            <div class="form-group">
+                <label for="roomDesc">Description</label>
+                <input type="text" id="roomDesc" placeholder="Enter room description" />
+            </div>
+            <div id="createRoomError" class="error-message"></div>
+            <div class="modal-buttons">
+                <button class="btn btn-primary" onclick="createRoom()">Create</button>
+                <button class="btn btn-secondary" onclick="closeCreateRoomModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = `http://${window.location.host}`;
+        const WS_BASE_URL = `ws://${window.location.host}`;
+
+        let isLoginMode = true;
+        let authToken = localStorage.getItem("authToken");
+        let currentUserId = localStorage.getItem("userId");
+        let selectedRoomId = null;
+        let ws = null;
+
+        // ===== Auth Functions =====
+        document.getElementById("authForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const errorDiv = document.getElementById("errorMessage");
+            const successDiv = document.getElementById("successMessage");
+
+            errorDiv.classList.remove("show");
+            successDiv.classList.remove("show");
+
+            try {
+                if (isLoginMode) {
+                    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ email, password })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error("Invalid email or password");
+                    }
+
+                    const data = await response.json();
+                    localStorage.setItem("authToken", data.access_token);
+
+                    // Decode token to get user ID
+                    const payload = JSON.parse(atob(data.access_token.split(".")[1]));
+                    localStorage.setItem("userId", payload.sub);
+
+                    authToken = data.access_token;
+                    currentUserId = payload.sub;
+
+                    showChatInterface();
+                } else {
+                    const username = document.getElementById("username").value;
+                    const role = document.getElementById("role").value;
+
+                    if (!username) {
+                        throw new Error("Username is required");
+                    }
+
+                    const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ username, email, password, role })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.detail || "Signup failed");
+                    }
+
+                    const data = await response.json();
+                    localStorage.setItem("authToken", data.access_token);
+
+                    const payload = JSON.parse(atob(data.access_token.split(".")[1]));
+                    localStorage.setItem("userId", payload.sub);
+
+                    authToken = data.access_token;
+                    currentUserId = payload.sub;
+
+                    successDiv.textContent = "Account created successfully! Redirecting...";
+                    successDiv.classList.add("show");
+
+                    setTimeout(() => showChatInterface(), 1500);
+                }
+            } catch (error) {
+                errorDiv.textContent = error.message;
+                errorDiv.classList.add("show");
+            }
+        });
+
+        document.getElementById("toggleBtn").addEventListener("click", () => {
+            isLoginMode = !isLoginMode;
+            const usernameField = document.getElementById("usernameField");
+            const roleField = document.getElementById("roleField");
+            const authTitle = document.getElementById("authTitle");
+            const authSubtitle = document.getElementById("authSubtitle");
+            const submitBtn = document.getElementById("submitBtn");
+            const toggleBtn = document.getElementById("toggleBtn");
+
+            if (isLoginMode) {
+                usernameField.style.display = "none";
+                roleField.style.display = "none";
+                authTitle.textContent = "Login";
+                authSubtitle.textContent = "Welcome back to Chat App";
+                submitBtn.textContent = "Login";
+                toggleBtn.textContent = "Sign Up";
+            } else {
+                usernameField.style.display = "block";
+                roleField.style.display = "block";
+                authTitle.textContent = "Sign Up";
+                authSubtitle.textContent = "Create a new account";
+                submitBtn.textContent = "Sign Up";
+                toggleBtn.textContent = "Login";
+            }
+
+            document.getElementById("authForm").reset();
+            document.getElementById("errorMessage").classList.remove("show");
+        });
+
+        // ===== Chat Functions =====
+        function showChatInterface() {
+            document.getElementById("authContainer").style.display = "none";
+            document.getElementById("chatContainer").classList.add("active");
+            loadRooms();
+            updateUserInfo();
+        }
+
+        function updateUserInfo() {
+            const payload = JSON.parse(atob(authToken.split(".")[1]));
+            const userRole = payload.role || "user";
+            document.getElementById("userInfo").textContent = `ID: ${currentUserId} (${userRole})`;
+        }
+
+        async function loadRooms() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/rooms`, {
+                    headers: { "Authorization": `Bearer ${authToken}` }
+                });
+
+                if (!response.ok) throw new Error("Failed to load rooms");
+
+                const rooms = await response.json();
+                const roomsList = document.getElementById("roomsList");
+                roomsList.innerHTML = "";
+
+                if (rooms.length === 0) {
+                    roomsList.innerHTML = '<div class="room-item"><p style="color: #999;">No rooms available. Create one as admin.</p></div>';
+                    return;
+                }
+
+                rooms.forEach(room => {
+                    const roomDiv = document.createElement("div");
+                    roomDiv.className = "room-item";
+                    roomDiv.onclick = () => selectRoom(room.id, room.name, room.description);
+                    roomDiv.innerHTML = `
+                        <h3>${escapeHtml(room.name)}</h3>
+                        <p>${escapeHtml(room.description)}</p>
+                    `;
+                    roomsList.appendChild(roomDiv);
+                });
+            } catch (error) {
+                console.error("Error loading rooms:", error);
+                const roomsList = document.getElementById("roomsList");
+                roomsList.innerHTML = '<div class="room-item"><p style="color: #e74c3c;">Error loading rooms</p></div>';
+            }
+        }
+
+        function selectRoom(roomId, roomName, roomDesc) {
+            selectedRoomId = roomId;
+
+            // Update UI
+            document.querySelectorAll(".room-item").forEach(item => item.classList.remove("active"));
+            event.target.closest(".room-item").classList.add("active");
+
+            document.getElementById("selectedRoomName").textContent = roomName;
+            document.getElementById("selectedRoomDesc").textContent = roomDesc;
+            document.getElementById("inputArea").style.display = "flex";
+            document.getElementById("messageInput").focus();
+
+            // Clear messages container
+            document.getElementById("messagesContainer").innerHTML = "";
+
+            // Connect to WebSocket
+            connectToRoom(roomId);
+
+            // Load message history
+            loadMessageHistory(roomId);
+        }
+
+        function connectToRoom(roomId) {
+            if (ws) {
+                ws.close();
+            }
+
+            ws = new WebSocket(
+                `${WS_BASE_URL}/chat/ws/${roomId}?token=${authToken}`
+            );
+
+            ws.onopen = () => {
+                console.log("Connected to room", roomId);
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                displayMessage(data.user_id, data.content, data.timestamp, data.user_id == currentUserId);
+            };
+
+            ws.onerror = (error) => {
+                console.error("WebSocket error:", error);
+                alert("Error connecting to room. Please try again.");
+            };
+
+            ws.onclose = () => {
+                console.log("Disconnected from room");
+            };
+        }
+
+        async function loadMessageHistory(roomId) {
+            try {
+                const response = await fetch(
+                    `${API_BASE_URL}/rooms/${roomId}/messages`,
+                    { headers: { "Authorization": `Bearer ${authToken}` } }
+                );
+
+                if (!response.ok) throw new Error("Failed to load messages");
+
+                const messages = await response.json();
+                const container = document.getElementById("messagesContainer");
+                container.innerHTML = "";
+
+                messages.forEach(msg => {
+                    displayMessage(msg.user_id, msg.content, msg.timestamp, msg.user_id == currentUserId);
+                });
+
+                // Scroll to bottom
+                container.scrollTop = container.scrollHeight;
+            } catch (error) {
+                console.error("Error loading message history:", error);
+            }
+        }
+
+        function displayMessage(userId, content, timestamp, isOwn) {
+            const container = document.getElementById("messagesContainer");
+            const messageDiv = document.createElement("div");
+            messageDiv.className = `message ${isOwn ? "own" : "other"}`;
+
+            const time = new Date(timestamp).toLocaleTimeString();
+
+            messageDiv.innerHTML = `
+                <div class="message-bubble">${escapeHtml(content)}</div>
+                <div class="message-meta">User #${userId} • ${time}</div>
+            `;
+
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById("messageInput");
+            const content = input.value.trim();
+
+            if (!content) return;
+
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(content);
+                input.value = "";
+                input.focus();
+            } else {
+                alert("Not connected to room");
+            }
+        }
+
+        document.getElementById("messageInput").addEventListener("keypress", (e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // ===== Room Management =====
+        document.getElementById("createRoomBtn").addEventListener("click", () => {
+            document.getElementById("createRoomModal").classList.add("show");
+        });
+
+        function closeCreateRoomModal() {
+            document.getElementById("createRoomModal").classList.remove("show");
+            document.getElementById("roomName").value = "";
+            document.getElementById("roomDesc").value = "";
+            document.getElementById("createRoomError").classList.remove("show");
+        }
+
+        async function createRoom() {
+            const name = document.getElementById("roomName").value.trim();
+            const description = document.getElementById("roomDesc").value.trim();
+            const errorDiv = document.getElementById("createRoomError");
+
+            errorDiv.classList.remove("show");
+
+            if (!name || !description) {
+                errorDiv.textContent = "Please fill all fields";
+                errorDiv.classList.add("show");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/rooms`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ name, description })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || "Failed to create room");
+                }
+
+                closeCreateRoomModal();
+                loadRooms();
+                alert("Room created successfully!");
+            } catch (error) {
+                errorDiv.textContent = error.message;
+                errorDiv.classList.add("show");
+            }
+        }
+
+        // ===== Logout =====
+        document.getElementById("logoutBtn").addEventListener("click", () => {
+            if (ws) ws.close();
+            localStorage.removeItem("authToken");
+            localStorage.removeItem("userId");
+            location.reload();
+        });
+
+        // ===== Utility Functions =====
+        function escapeHtml(text) {
+            const div = document.createElement("div");
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ===== Initialize =====
+        if (authToken && currentUserId) {
+            showChatInterface();
+        }
+    </script>
+</body>
+</html>
