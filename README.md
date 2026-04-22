@@ -33,17 +33,9 @@ pip install -r requirements.txt
 
 ### 4. Setup Database
 
-Create an empty PostgreSQL database:
-```bash
-createdb chat_db
-```
+PostgreSQL must be running. The application will automatically create the database and all tables on startup.
 
-Or use psql:
-```sql
-CREATE DATABASE chat_db;
-```
-
-**Note**: Tables will be created automatically when you run the server.
+**Note**: Make sure PostgreSQL service is running on your system before starting the server.
 
 ### 5. Configure Environment
 
