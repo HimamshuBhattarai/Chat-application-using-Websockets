@@ -23,7 +23,7 @@ class UserResponse(BaseModel):
     name: Optional[str] = None  
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class MessageResponse(BaseModel):
     id: int
@@ -33,7 +33,7 @@ class MessageResponse(BaseModel):
     room_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
         
 class RoomCreate(BaseModel):
     name: str
