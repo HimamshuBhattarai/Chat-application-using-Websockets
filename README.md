@@ -102,7 +102,7 @@ app/
 ## Environment Variables
 
 See `.env.example` for all required variables.
-```
+
 
 ## Key Features Explained
 
